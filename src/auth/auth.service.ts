@@ -1,7 +1,6 @@
 import {
   ConflictException,
   Injectable,
-  Res,
   UnauthorizedException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
@@ -10,7 +9,7 @@ import { UsersService } from 'src/users/users.service';
 import { LoginDto } from './dto/auth.dto';
 import { User } from 'src/users/entity/user.entity';
 import { JwtService } from '@nestjs/jwt';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -35,10 +34,7 @@ export class AuthService {
     return user;
   }
 
-  async login(
-    login: LoginDto,
-    @Res({ passthrough: true }) res: Response,
-  ): Promise<User> {
+  async login(login: LoginDto, res: Response): Promise<User> {
     const { email, password } = login;
     const user = await this.userService.findOne({ where: { email } });
     if (!user || !(await bcrypt.compare(password, user.password))) {
@@ -50,5 +46,11 @@ export class AuthService {
     res.cookie('jwt', jwt, { httpOnly: true });
 
     return user;
+  }
+
+  async user(req: Request): Promise<User> {
+    const cookie = req.cookies['jwt'];
+    const data = await this.jwtService.verifyAsync(cookie);
+    return await this.userService.findUser(data['id']);
   }
 }

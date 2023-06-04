@@ -1,9 +1,20 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Get,
+  Res,
+  Req,
+  UseInterceptors,
+  ClassSerializerInterceptor,
+} from '@nestjs/common';
 import { CreateUserDto } from 'src/users/dto/user.dto';
 import { User } from 'src/users/entity/user.entity';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/auth.dto';
+import { Request, Response } from 'express';
 
+@UseInterceptors(ClassSerializerInterceptor)
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -14,7 +25,12 @@ export class AuthController {
   }
 
   @Post('login')
-  async login(@Body() loginDto: LoginDto): Promise<User> {
-    return this.authService.login(loginDto);
+  async login(@Body() loginDto: LoginDto, @Res() res: Response): Promise<User> {
+    return this.authService.login(loginDto, res);
+  }
+
+  @Get('user')
+  async user(@Req() req: Request): Promise<User> {
+    return this.authService.user(req);
   }
 }
