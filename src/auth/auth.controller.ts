@@ -33,4 +33,12 @@ export class AuthController {
   async user(@Req() req: Request): Promise<User> {
     return this.authService.user(req);
   }
+
+  @Post('logout')
+  async logout(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie('jwt');
+    return {
+      message: 'Logout successful',
+    };
+  }
 }
