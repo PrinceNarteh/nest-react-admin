@@ -5,6 +5,7 @@ import {
   Get,
   Res,
   Req,
+  UseGuards,
   UseInterceptors,
   ClassSerializerInterceptor,
 } from '@nestjs/common';
@@ -13,6 +14,7 @@ import { User } from 'src/users/entity/user.entity';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/auth.dto';
 import { Request, Response } from 'express';
+import { AuthGuard } from './auth.guard';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('auth')
@@ -29,11 +31,13 @@ export class AuthController {
     return this.authService.login(loginDto, res);
   }
 
+  @UseGuards(AuthGuard)
   @Get('user')
   async user(@Req() req: Request): Promise<User> {
     return this.authService.user(req);
   }
 
+  @UseGuards(AuthGuard)
   @Post('logout')
   async logout(@Res({ passthrough: true }) res: Response) {
     res.clearCookie('jwt');
